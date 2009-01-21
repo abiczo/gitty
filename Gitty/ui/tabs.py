@@ -140,7 +140,7 @@ class ProjectTab(gtk.VBox):
 
 
     def get_commit_contents(self, commit):
-        diff = self.client.diff_tree(commit.commit_sha1, commit.parent_sha1[0])
+        diff = self.client.diff_tree(commit.parent_sha1[0], commit.commit_sha1)
 
         header = self.client.get_commit_header(commit.commit_sha1)
 
