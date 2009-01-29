@@ -120,26 +120,30 @@ class ProjectTab(gtk.VBox):
         self.old_version_view.show()
         self.content_notebook.append_page(self.old_version_view,
                                           gtk.Label("Old Version"))
+        self.old_version_view.set_mimetype("text/x-patch")
 
         self.new_version_view = SourceView()
         self.new_version_view.show()
         self.content_notebook.append_page(self.new_version_view,
                                           gtk.Label("New Version"))
+        self.new_version_view.set_mimetype("text/x-patch")
 
         return vbox
 
     def on_commit_changed(self, widget, commit):
         self.sha1_label.set_text(commit.commit_sha1)
-        self.diff_viewer.set_text(self.get_commit_contents(commit))
+        self.diff_viewer.set_text(self.get_commit_contents(commit, True, True))
 
-        self.old_version_view.set_text(self.get_commit_contents(commit))
-        self.new_version_view.set_text(self.get_commit_contents(commit))
+        self.old_version_view.set_text(self.get_commit_contents(commit, True,
+                                                                False))
+        self.new_version_view.set_text(self.get_commit_contents(commit, False,
+                                                                True))
 
     def on_references_clicked(self, widget):
         pass
 
 
-    def get_commit_contents(self, commit):
+    def get_commit_contents(self, commit, show_old=True, show_new=True):
         diff = self.client.diff_tree(commit.parent_sha1[0], commit.commit_sha1)
 
         header = self.client.get_commit_header(commit.commit_sha1)
@@ -153,6 +157,28 @@ class ProjectTab(gtk.VBox):
         contents += "Branch:    %s\n" % ("")
 
         contents += "\n%s\n\n" % header["message"]
-        contents += diff
+
+        contents += self.filter_diff(diff, show_old, show_new)
 
         return contents
+
+    def filter_diff(self, diff_output, show_old, show_new):
+        diff_lines = []
+        in_header = True
+
+        for line in diff_output.split('\n'):
+            if line.startswith("diff "):
+                in_header = True
+                diff_lines.append(line)
+            elif line.startswith("@@"):
+                in_header = False
+                diff_lines.append(line)
+            elif in_header:
+                diff_lines.append(line)
+            else:
+                if line.startswith(" ") or \
+                   (line.startswith("-") and show_old) or \
+                   (line.startswith("+") and show_new):
+                    diff_lines.append(line)
+
+        return "\n".join(diff_lines)
