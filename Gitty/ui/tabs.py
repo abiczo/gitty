@@ -144,7 +144,7 @@ class ProjectTab(gtk.VBox):
 
 
     def get_commit_contents(self, commit, show_old=True, show_new=True):
-        diff = self.client.diff_tree(commit.parent_sha1[0], commit.commit_sha1)
+        diff = self.client.diff_tree(commit.commit_sha1)
 
         header = self.client.get_commit_header(commit.commit_sha1)
 
@@ -165,10 +165,12 @@ class ProjectTab(gtk.VBox):
     def filter_diff(self, diff_output, show_old, show_new):
         diff_lines = []
         in_header = True
+        is_merge = False
 
         for line in diff_output.split('\n'):
             if line.startswith("diff "):
                 in_header = True
+                is_merge = line.startswith("diff --cc")
                 diff_lines.append(line)
             elif line.startswith("@@"):
                 in_header = False
@@ -176,7 +178,9 @@ class ProjectTab(gtk.VBox):
             elif in_header:
                 diff_lines.append(line)
             else:
-                if line.startswith(" ") or \
+                # no old/new version distinction for merge diffs
+                if is_merge or \
+                   line.startswith(" ") or \
                    (line.startswith("-") and show_old) or \
                    (line.startswith("+") and show_new):
                     diff_lines.append(line)

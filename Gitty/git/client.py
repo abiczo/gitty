@@ -14,8 +14,9 @@ class Client(object):
 
         return self.encoding
 
-    def diff_tree(self, parent_sha1, commit_sha1):
-        fp = os.popen("git diff-tree -p %s %s" % (parent_sha1, commit_sha1))
+    def diff_tree(self, commit_sha1):
+        fp = os.popen("git diff-tree -p -C --cc --no-commit-id %s" %
+                      commit_sha1)
         contents = unicode(fp.read(), self.get_encoding()).encode("utf-8")
         fp.close()
 
