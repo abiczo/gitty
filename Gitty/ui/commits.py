@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 import cairo
 import gobject
 import gtk
@@ -393,7 +395,8 @@ class CommitsTree(gtk.TreeView):
             for ref in commit.references:
                 self.references[ref] = iter;
 
-        self.emit('references_changed', self.references.keys())
+        sorted_refs = sorted(self.references.keys(), key=attrgetter('name'))
+        self.emit('references_changed', sorted_refs)
 
         self.queue_resize()
 
