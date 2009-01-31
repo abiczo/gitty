@@ -180,7 +180,7 @@ class ProjectTab(gtk.VBox):
             else:
                 # no old/new version distinction for merge diffs
                 if is_merge or \
-                   line.startswith(" ") or \
+                   (not line.startswith("-") and not line.startswith("+")) or \
                    (line.startswith("-") and show_old) or \
                    (line.startswith("+") and show_new):
                     diff_lines.append(line)
