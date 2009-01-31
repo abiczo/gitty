@@ -152,7 +152,8 @@ class ProjectTab(gtk.VBox):
                                              header["author"]["time"])
         contents += "Committer: %s  %s\n" % (header["committer"]["name"],
                                              header["committer"]["time"])
-        contents += "Parent:    %s (%s)\n" % (header["parent"], "")
+        if "parent" in header:
+            contents += "Parent:    %s (%s)\n" % (header["parent"], "")
         contents += "Child:     %s (%s)\n" % ("", "")
         contents += "Branch:    %s\n" % ("")
 
