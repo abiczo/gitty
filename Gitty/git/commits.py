@@ -75,7 +75,7 @@ class Commit(object):
         return message
 
     def diff_tree(self):
-        fp = os.popen("git diff-tree --pretty --cc -v -p --always" +
+        fp = os.popen("git diff-tree --pretty --cc -v -p --always " +
                       self.commit_sha1)
         diff = fp.read()
         fp.close()
