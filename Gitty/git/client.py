@@ -14,8 +14,9 @@ class Client(object):
 
         return self.encoding
 
-    def diff_tree(self, commit_sha1, ignore_space_change=False):
+    def diff_tree(self, commit_sha1, context_lines=3, ignore_space_change=False):
         cmd = "git diff-tree -p -C --cc --no-commit-id"
+        cmd += " --unified=" + str(context_lines)
 
         if ignore_space_change:
             cmd += " --ignore-all-space"
