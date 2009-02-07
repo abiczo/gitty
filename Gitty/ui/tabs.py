@@ -103,6 +103,16 @@ class ProjectTab(gtk.VBox):
         self.sha1_label.set_max_width_chars(40)
         self.sha1_label.set_selectable(True)
 
+        diff_options_hbox = gtk.HBox(False, 0);
+        diff_options_hbox.show()
+        vbox.pack_start(diff_options_hbox, False, False, 0)
+
+        self.ignore_space_button = gtk.CheckButton("Ignore space change")
+        self.ignore_space_button.connect("toggled",
+                                         self.on_ignore_space_toggled)
+        self.ignore_space_button.show()
+        diff_options_hbox.pack_start(self.ignore_space_button, False, False, 0)
+
         paned = gtk.HPaned()
         paned.show()
         vbox.pack_start(paned, True, True, 0)
@@ -132,19 +142,32 @@ class ProjectTab(gtk.VBox):
 
     def on_commit_changed(self, widget, commit):
         self.sha1_label.set_text(commit.commit_sha1)
-        self.diff_viewer.set_text(self.get_commit_contents(commit, True, True))
 
-        self.old_version_view.set_text(self.get_commit_contents(commit, True,
-                                                                False))
-        self.new_version_view.set_text(self.get_commit_contents(commit, False,
-                                                                True))
+        ignore_space_change = self.ignore_space_button.get_active()
+
+        diff = self.get_commit_contents(commit, True, True,
+                                        ignore_space_change)
+        self.diff_viewer.set_text(diff)
+
+        diff_old = self.get_commit_contents(commit, True, False,
+                                            ignore_space_change)
+        self.old_version_view.set_text(diff_old)
+
+        diff_new = self.get_commit_contents(commit, False, True,
+                                            ignore_space_change)
+        self.new_version_view.set_text(diff_new)
 
     def on_references_clicked(self, widget):
         pass
 
+    def on_ignore_space_toggled(self, widget):
+        if self.commits_tree.selected_commit is not None:
+            self.on_commit_changed(self.commits_tree,
+                                   self.commits_tree.selected_commit)
 
-    def get_commit_contents(self, commit, show_old=True, show_new=True):
-        diff = self.client.diff_tree(commit.commit_sha1)
+    def get_commit_contents(self, commit, show_old=True, show_new=True,
+                            ignore_space_change=False):
+        diff = self.client.diff_tree(commit.commit_sha1, ignore_space_change)
 
         header = self.client.get_commit_header(commit.commit_sha1)
 

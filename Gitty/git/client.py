@@ -14,9 +14,15 @@ class Client(object):
 
         return self.encoding
 
-    def diff_tree(self, commit_sha1):
-        fp = os.popen("git diff-tree -p -C --cc --no-commit-id %s" %
-                      commit_sha1)
+    def diff_tree(self, commit_sha1, ignore_space_change=False):
+        cmd = "git diff-tree -p -C --cc --no-commit-id"
+
+        if ignore_space_change:
+            cmd += " --ignore-all-space"
+            
+        cmd += " " + commit_sha1
+
+        fp = os.popen(cmd)
         contents = unicode(fp.read(), self.get_encoding()).encode("utf-8")
         fp.close()
 
