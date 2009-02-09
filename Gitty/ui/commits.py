@@ -176,6 +176,9 @@ class CommitCellRenderer(ReferencesCellRenderer):
 
         bg_area_y2 = bg_area.y + bg_area.height
 
+        # the column of the leftmost line that goes into or out of this cell
+        max_line_col = 0
+
         # Draw the lines into the cell
         for start, end, color in self.commit.in_lines:
             ctx.move_to(cell_area.x + box_size * start + box_size / 2,
@@ -194,6 +197,8 @@ class CommitCellRenderer(ReferencesCellRenderer):
 
             self.set_color(ctx, color, 0, 0.65)
             ctx.stroke()
+
+            max_line_col = max(max_line_col, end)
 
         # Draw the lines out of the cell
         for start, end, color in self.commit.out_lines:
@@ -214,10 +219,12 @@ class CommitCellRenderer(ReferencesCellRenderer):
             self.set_color(ctx, color, 0, 0.65)
             ctx.stroke()
 
+            max_line_col = max(max_line_col, start)
+
         # Draw the revision node in the right column
         column, color = self.commit.node
-        x_offset = cell_area.x + box_size * column + box_size / 2
-        ctx.arc(x_offset, cell_area.y + cell_area.height / 2,
+        x_offset_rev_node = cell_area.x + box_size * column + box_size / 2
+        ctx.arc(x_offset_rev_node, cell_area.y + cell_area.height / 2,
                 box_size / 4, 0, 2 * math.pi)
 
         self.set_color(ctx, color, 0, 0.5)
@@ -229,6 +236,10 @@ class CommitCellRenderer(ReferencesCellRenderer):
         #x_offset = box_size * column + box_size
         #y_offset = (cell_area.height - text_height) / 2
 
+        x_offset = cell_area.x + box_size * max_line_col + box_size / 2
+        # the rounding down is needed because max_line_col might be a float
+        x_offset = int(x_offset)
+
         line_y = cell_area.y + cell_area.height / 2
         x_offset += box_size / 4 + 1
         y_offset = cell_area.y + 1
@@ -236,10 +247,13 @@ class CommitCellRenderer(ReferencesCellRenderer):
         self.commit.ref_boxes = []
 
         # Draw the tags and branches
-        for ref in self.commit.references:
+        for idx, ref in enumerate(self.commit.references):
             # Draw the line to the box
             ctx.set_line_width(box_size / 8)
-            ctx.move_to(x_offset, line_y)
+            if idx == 0:
+                ctx.move_to(x_offset_rev_node + box_size / 4 + 1, line_y)
+            else:
+                ctx.move_to(x_offset, line_y)
             x_offset += box_size / 2
             ctx.line_to(x_offset, line_y)
             self.set_color(ctx, color, 0, 0.5)
