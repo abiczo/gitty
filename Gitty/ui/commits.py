@@ -82,7 +82,7 @@ class ReferencesCellRenderer(gtk.GenericCellRenderer):
             layout = self.build_box_layout(parts[1], widget)
             text_width, text_height = layout.get_pixel_size()
             width = text_width + 14
-            height = text_height + 4
+            height = text_height + 3
 
             x1 = x_offset + 0.5
             x2 = x1 + width
