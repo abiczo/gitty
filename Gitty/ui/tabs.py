@@ -28,6 +28,10 @@ class ProjectTab(gtk.VBox):
         widget.show()
         paned.pack2(widget, False)
 
+        # Select the first commit
+        if len(self.commits_tree.model) > 0:
+            self.commits_tree.set_cursor('0');
+
     def __build_top_pane(self):
         def on_references_toggled(toggle):
             if toggle.get_active():
